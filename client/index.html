@@ -1,0 +1,92 @@
+<DOCTYPE html>
+<html lang='en' ng-app='myApp'>
+<head>
+	<title></title>
+	<!-- BOOTSTRAP CDN -->
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+	<!-- ANGULAR CDN -->
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular-route.min.js"></script>
+
+    <!-- JQUERY CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+
+    <!-- JQUERY UI CDN -->
+	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+	<!-- ANGULAR CODES -->
+	<script type="text/javascript">
+		var myApp = angular.module('myApp', ['ngRoute']);
+		myApp.config(function($routeProvider){
+			$routeProvider
+				.when('/login', {
+					templateUrl: 'partials/login.html'
+				})
+				.when('/dashboard', {
+					templateUrl: 'partials/dashboard'
+				})
+				.otherwise({
+					redirectTo: '/'
+				});
+		});
+
+		//USER CONTROLLER
+		myApp.controller('userCtrl', function($scope, $location, $routeParams, userFactory){
+			$scope.current_user = [];
+
+			$scope.loginUser = function(data){
+				userFactory.login($scope.newUser, function(data){
+					$scope.current_user = data;
+				});
+
+				$scope.newUser = {};
+				$location.path('/dashboard');
+			}
+		});
+
+		//DASHBOARD CONTROLLER
+		myApp.controller('dashCtrl', function($scope, $location, $routeParams, userFactory){
+			$scope.current_user = [];
+
+			userFactory.get_user(function(data){
+				$scope.current_user = info[0].name;
+			});
+
+			$scope.logout = function(){
+				$scope.current_user = "";
+			}
+		});
+
+		//USER FACTORY
+		myApp.factory('userFactory', function($http){
+			var factory = {};
+			var current_user = [];
+
+			factory.login = function(info, callback){
+				current_user.push(info);
+				callback(current_user);
+			}
+
+			factory.get_user = function(callback){
+				callback(current_user);
+			}
+			return factory;
+		});
+	</script>
+</head>
+<body>
+	<div class="container">
+		<div ng-view="">
+		</div>
+	</div>
+</body>
+</html>
