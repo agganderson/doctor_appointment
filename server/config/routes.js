@@ -1,18 +1,17 @@
-var controller name = require('./../controllers/!!!!!!controller name');
+var appointments = require('./../controllers/appointments.js');
 
 module.exports = function(app){
-	app.get('/routeNAMEhere', function(req, res){
+	app.get('/appointments', function(req, res){
 		console.log('in app get route');
-		HEREisYOURcontrollerNAME.index(req, res);
+		appointments.index(req, res);
 	});
 
-	app.post('/routeNAMEhere', function(req, res){
+	app.post('/appointments', function(req, res){
 		console.log('in app post route');
-		HEREisYOURcontrollerNAME.create(req, res);
+		appointments.create(req, res);
 	});
 
-	//route with id parameter example!
-	// app.get('/getPoll/:id', function(req, res){
-	// 	polls.getThisPoll(req, res, req.params.id);
-	// });
+	app.post('/deleteAppointment/:id', function(req, res){
+		appointments.delete(req, res, req.params.id);
+	});
 }

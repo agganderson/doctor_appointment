@@ -1,7 +1,7 @@
 <DOCTYPE html>
 <html lang='en' ng-app='myApp'>
 <head>
-	<title></title>
+	<title>Doctors Appointment</title>
 	<!-- BOOTSTRAP CDN -->
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
@@ -31,8 +31,11 @@
 				.when('/login', {
 					templateUrl: 'partials/login.html'
 				})
-				.when('/dashboard', {
-					templateUrl: 'partials/dashboard'
+				.when('/appointments', {
+					templateUrl: 'partials/appointments.html'
+				})
+				.when('/new_appointment', {
+					templateUrl: 'partials/new_appointment.html'
 				})
 				.otherwise({
 					redirectTo: '/'
@@ -40,30 +43,80 @@
 		});
 
 		//USER CONTROLLER
-		myApp.controller('userCtrl', function($scope, $location, $routeParams, userFactory){
+		myApp.controller('userController', function($scope, $location, $routeParams, userFactory){
 			$scope.current_user = [];
 
 			$scope.loginUser = function(data){
+				// console.log($scope.newUser);
 				userFactory.login($scope.newUser, function(data){
 					$scope.current_user = data;
+					// console.log($scope.current_user);
 				});
 
 				$scope.newUser = {};
-				$location.path('/dashboard');
+				$location.path('/appointments');
 			}
-		});
-
-		//DASHBOARD CONTROLLER
-		myApp.controller('dashCtrl', function($scope, $location, $routeParams, userFactory){
-			$scope.current_user = [];
-
-			userFactory.get_user(function(data){
-				$scope.current_user = info[0].name;
-			});
 
 			$scope.logout = function(){
 				$scope.current_user = "";
 			}
+		});
+
+		//APPOINTMENT CONTROLLER
+		myApp.controller('appointmentController', function($scope, $location, $routeParams, userFactory, appointmentFactory){
+			$scope.current_user = [];
+			$scope.appointments = [];
+
+			userFactory.get_user(function(info){
+				$scope.current_user = info[0].name;
+			});
+
+			appointmentFactory.index(function(data){
+				// console.log(data);
+				$scope.appointments = data;
+			});
+
+			$scope.cancelAppointment = function(id){
+				appointmentFactory.delete(id, function(){
+					appointmentFactory.index(function(data){
+						$scope.appointments = data;
+					});
+				});
+			}
+
+			$scope.logout = function(){
+				$scope.current_user = "";
+			}
+
+		});
+
+		//NEW APPOINTMENT CONTROLLER
+		myApp.controller('newAppointmentController', function($scope, $location, $routeParams, userFactory, appointmentFactory){
+			$scope.current_user = [];
+			$scope.appointments = [];
+			$scope.current_date = new Date();
+
+			userFactory.get_user(function(info){
+				$scope.current_user = info[0].name;
+			});
+
+			$scope.addAppointment = function(data){
+				// console.log('new appointment controller', $scope.newAppointment);
+				if ($scope.newAppointment.date < $scope.current_date){
+					$scope.newAppointment = {};
+					$scope.message = 'Appointment date needs to be set as future date';
+				}
+				else {
+					appointmentFactory.create($scope.newAppointment, function(data){
+						$scope.appointments = data;
+					// console.log($scope.appointments);
+					});
+					$scope.newAppointment = {};
+					$location.path('/appointments');
+				}
+
+			}
+
 		});
 
 		//USER FACTORY
@@ -81,10 +134,43 @@
 			}
 			return factory;
 		});
+
+		//APPOINTMENT CONTROLLER 
+		myApp.factory('appointmentFactory', function($http){
+			var factory = {};
+			var appointments = [];
+
+			factory.index = function(callback){
+				$http.get('appointments').success(function(output){
+					appointments = output;
+					// console.log(appointments);
+					callback(appointments);
+				});
+			}
+
+			factory.create = function(info, callback){
+				// console.log('appointment factory create');
+				$http.post('/appointments', info).success(function(output){
+					callback(appointments);
+					// console.log(appointments);
+				});
+			}
+
+			factory.delete = function(id, callback){
+				console.log('in delete appointment factory');
+				$http.post('/deleteAppointment/' + id).success(function(output){
+					callback(output);
+				});
+			}
+
+			return factory;
+		})
 	</script>
 </head>
 <body>
 	<div class="container">
+		<h1>Welcome</h1>
+		<a href="#/login">Login</a>
 		<div ng-view="">
 		</div>
 	</div>
