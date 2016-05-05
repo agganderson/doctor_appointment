@@ -95,6 +95,7 @@
 			$scope.current_user = [];
 			$scope.appointments = [];
 			$scope.current_date = new Date();
+			$scope.error = [];
 
 			userFactory.get_user(function(info){
 				$scope.current_user = info[0].name;
@@ -108,7 +109,8 @@
 				}
 				else {
 					appointmentFactory.create($scope.newAppointment, function(data){
-						$scope.appointments = data;
+						// $scope.appointments = data;
+						$scope.error = data;
 					// console.log($scope.appointments);
 					});
 					$scope.newAppointment = {};
